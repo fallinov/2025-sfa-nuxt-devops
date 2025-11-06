@@ -5,10 +5,6 @@ export default defineNuxtConfig({
     '@nuxt/ui'
   ],
 
-  app: {
-    baseURL: '/2025-sfa-referentiel-outils/' // remplace par le nom exact du dépôt
-  },
-
   devtools: {
     enabled: true
   },
