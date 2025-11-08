@@ -15,16 +15,6 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
-  routeRules: {
-    '/**': { prerender: true }
-  },
-  prerender: {
-    crawlLinks: true,
-    failOnError: false
-  },
-  nitro: {
-    preset: 'github_pages'
-  },
 
   compatibilityDate: '2025-01-15',
 
