@@ -95,22 +95,45 @@ pnpm run generate:prod
 pnpm run generate
 ```
 
-### **Creating a Release**
+### **Deploying to Production**
 
-To deploy to production:
+You have **TWO options** to deploy to production:
+
+#### **Option 1: Quick deployment with tags (recommended for daily use)**
 
 ```bash
-# 1. Tag the release
+# Create and push a version tag
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+→ **Automatic SFTP deployment triggered** ✅
+
+**When to use:** Fast deployments, hotfixes, regular updates
+
+---
+
+#### **Option 2: Documented deployment with releases (recommended for major versions)**
+
+```bash
+# 1. Create and push a tag (if not already done)
 git tag v1.0.0
 git push origin v1.0.0
 
-# 2. Create a GitHub release
-# Go to: https://github.com/fallinov/2025-sfa-referentiel-outils/releases/new
-# Or use GitHub CLI:
-gh release create v1.0.0 --title "Release v1.0.0" --notes "Description of changes"
+# 2. Create a GitHub release with documentation
+# Via GitHub UI: https://github.com/fallinov/2025-sfa-referentiel-outils/releases/new
+# Or via GitHub CLI:
+gh release create v1.0.0 --title "Release v1.0.0" --notes "## Changes\n- Feature A\n- Fix B"
 ```
 
-The SFTP deployment will trigger automatically.
+→ **Automatic SFTP deployment triggered** ✅
+→ **Plus:** Changelog, documentation, release notes
+
+**When to use:** Major releases, public-facing versions, documented milestones
+
+---
+
+Both methods trigger the same SFTP deployment workflow.
 
 ### **Configuration Required**
 
