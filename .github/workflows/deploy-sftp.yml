@@ -49,32 +49,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # --- ÉTAPE 2 : Installer pnpm (gestionnaire de paquets) ---
-      # Version identique au workflow de staging pour garantir la cohérence
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.19.0
-
-      # --- ÉTAPE 3 : Installer Node.js ---
+      # --- ÉTAPE 2 : Installer Node.js ---
       # Configuration identique au workflow de staging
+      # npm est inclus avec Node.js, pas besoin d'installation séparée
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"    # Version LTS de Node.js
-          cache: 'pnpm'         # Active le cache des dépendances
+          cache: 'npm'          # Active le cache des dépendances npm
 
-      # --- ÉTAPE 4 : Installer les dépendances du projet ---
-      # --frozen-lockfile garantit les mêmes versions qu'en développement
+      # --- ÉTAPE 3 : Installer les dépendances du projet ---
+      # npm ci : installation propre basée sur package-lock.json
+      # Garantit les mêmes versions qu'en développement
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
-      # --- ÉTAPE 5 : Générer le site statique pour la production ---
+      # --- ÉTAPE 4 : Générer le site statique pour la production ---
       # IMPORTANT : utilise 'generate:prod' qui configure baseURL à '/' (racine)
-      # Contrairement au staging qui utilise '/2025-sfa-nuxt-devops/'
+      # Contrairement au staging qui utilise '/<nom-du-depot>/'
       # NODE_ENV=production active les optimisations (minification, etc.)
       - name: Generate static site for production
-        run: pnpm run generate:prod
+        run: npm run generate:prod
         env:
           NODE_ENV: production
 

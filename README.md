@@ -31,7 +31,7 @@ Application web référençant les outils utilisés en formation par Steve Falle
 Installer les dépendances du projet :
 
 ```bash
-pnpm install
+npm install
 ```
 
 ---
@@ -41,23 +41,23 @@ pnpm install
 Démarrer le serveur de développement sur `http://localhost:3000` :
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 ### Autres commandes utiles
 
 ```bash
 # Vérifier le code (linting)
-pnpm run lint
+npm run lint
 
 # Vérifier les types TypeScript
-pnpm run typecheck
+npm run typecheck
 
 # Générer le site statique
-pnpm run generate
+npm run generate
 
 # Prévisualiser la version de production localement
-pnpm run preview
+npm run preview
 ```
 
 ---
@@ -81,7 +81,7 @@ Ce projet utilise une approche **trunk-based development** avec déploiements au
 ├─────────────────────────────────────────────────────┤
 │                                                      │
 │  1️⃣  Développement local                             │
-│      ↓ pnpm dev                                      │
+│      ↓ npm run dev                                   │
 │      ↓ Modifications du code                        │
 │      ↓                                               │
 │  2️⃣  Commit et push vers GitHub                      │
@@ -114,7 +114,7 @@ Ce projet utilise une approche **trunk-based development** avec déploiements au
 
 ```bash
 # Lancer le serveur de développement
-pnpm dev
+npm run dev
 
 # Modifier le code dans votre éditeur
 # Vérifier les changements sur http://localhost:3000
@@ -242,13 +242,13 @@ git tag -l
 
 ```bash
 # Générer pour GitHub Pages (avec sous-dossier)
-pnpm run generate:github
+npm run generate:github
 
 # Générer pour production (à la racine du domaine)
-pnpm run generate:prod
+npm run generate:prod
 
 # Génération standard (utilise variable d'environnement)
-pnpm run generate
+npm run generate
 ```
 
 ### 🔐 Configuration des secrets GitHub (pour l'enseignant)
