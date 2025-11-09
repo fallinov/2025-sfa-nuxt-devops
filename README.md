@@ -410,7 +410,7 @@ Maintenant que tout est configuré, voici le cycle de travail :
 **Cause :** Le `baseURL` est incorrect.
 
 **Solution :**
-1. Vérifier `NUXT_APP_BASE_URL` dans `.github/workflows/deploy.yml`
+1. Vérifier `NUXT_APP_BASE_URL` dans `.github/workflows/deploy-github-pages.yml`
 2. Le format doit être : `/nom-du-depot/` (avec les `/` au début et à la fin)
 
 ### Erreurs 404 sur les assets
