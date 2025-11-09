@@ -228,16 +228,16 @@ git push -u origin main
 mkdir -p .github/workflows
 
 # Créer le fichier workflow
-touch .github/workflows/deploy.yml
+touch .github/workflows/deploy-github-pages.yml
 ```
 
 ### 5.2 Configuration du workflow
 
-Copier ce code dans `.github/workflows/deploy.yml` :
+Copier ce code dans `.github/workflows/deploy-github-pages.yml` :
 
 ```yaml
 # Nom du workflow affiché dans l'onglet Actions de GitHub
-name: Deploy to GitHub Pages
+name: Deploy to GitHub Pages (Staging)
 
 # Déclencheurs : quand ce workflow s'exécute-t-il ?
 on:
@@ -337,7 +337,7 @@ NUXT_APP_BASE_URL: /mon-projet-nuxt/
 
 ```bash
 # Ajouter le workflow
-git add .github/workflows/deploy.yml public/.nojekyll
+git add .github/workflows/deploy-github-pages.yml public/.nojekyll
 
 # Commit
 git commit -m "ci: add GitHub Pages deployment workflow"
@@ -613,14 +613,21 @@ name: Deploy to Production (SFTP)
 
 # Déclencheurs : quand ce workflow s'exécute-t-il ?
 on:
-  # Déclenché uniquement lors de la création d'un tag Git
+  # OPTION 1 : Déclenché lors de la création d'un tag Git
   # Exemple : git tag v1.0.0 && git push origin v1.0.0
+  # Pratique pour déploiements rapides sans documentation formelle
   push:
     tags:
       - 'v*.*.*'  # Correspond à v1.0.0, v2.1.3, v0.5.2, etc.
 
-  # Permet le déclenchement manuel depuis l'onglet Actions
-  # Utile en cas d'urgence ou pour redéployer sans créer de tag
+  # OPTION 2 : Déclenché lorsqu'une release est publiée sur GitHub
+  # Créer une release via https://github.com/.../releases/new
+  # Recommandé pour versions majeures avec changelog et documentation
+  release:
+    types: [published]
+
+  # OPTION 3 : Déclenchement manuel depuis l'onglet Actions
+  # Utile en cas d'urgence ou pour redéployer sans créer de tag/release
   workflow_dispatch:
 
 # Jobs : tâches à exécuter
@@ -635,7 +642,7 @@ jobs:
     # Configuration de l'environnement de production
     environment:
       name: production                    # Nom de l'environnement
-      url: https://votredomaine.com       # Remplacer par votre URL de production
+      url: ${{ vars.PRODUCTION_URL }}     # URL du site de production (configurable dans GitHub)
 
     # Liste des étapes à exécuter dans l'ordre
     steps:
@@ -678,7 +685,8 @@ jobs:
           password: ${{ secrets.SFTP_PASSWORD }}
 
           # Port de connexion SFTP (généralement 22 pour SSH/SFTP)
-          port: ${{ secrets.SFTP_PORT }}
+          # || 22 signifie : utiliser 22 par défaut si SFTP_PORT n'est pas défini
+          port: ${{ secrets.SFTP_PORT || 22 }}
 
           # Dossier LOCAL à uploader (le ./ final = uploader le CONTENU)
           # ./.output/public/./ signifie : tout le contenu de .output/public/

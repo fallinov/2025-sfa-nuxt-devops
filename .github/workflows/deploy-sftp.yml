@@ -65,11 +65,11 @@ jobs:
         run: npm ci
 
       # --- ÉTAPE 4 : Générer le site statique pour la production ---
-      # IMPORTANT : utilise 'generate:prod' qui configure baseURL à '/' (racine)
-      # Contrairement au staging qui utilise '/<nom-du-depot>/'
       # NODE_ENV=production active les optimisations (minification, etc.)
+      # Pas de NUXT_APP_BASE_URL = baseURL par défaut à '/' (racine)
+      # Contrairement au staging qui utilise '/<nom-du-depot>/'
       - name: Generate static site for production
-        run: npm run generate:prod
+        run: npm run generate
         env:
           NODE_ENV: production
 
