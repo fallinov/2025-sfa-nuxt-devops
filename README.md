@@ -21,10 +21,22 @@ Ce guide vous accompagne **étape par étape** pour créer une application Nuxt 
 
 Avant de commencer, assurez-vous d'avoir :
 
+### Pour tous les apprentis :
 - ✅ **Node.js 20+** installé ([télécharger ici](https://nodejs.org/))
 - ✅ **Git** installé et configuré
 - ✅ Un **compte GitHub** actif
 - ✅ Un **éditeur de code** (VS Code recommandé)
+
+### Pour le déploiement en production (optionnel) :
+- ✅ Un **hébergement web** avec accès SFTP/FTP
+- ✅ Les **identifiants de connexion** fournis par votre hébergeur :
+  - Adresse du serveur (ex: `sftp.votredomaine.com`)
+  - Nom d'utilisateur
+  - Mot de passe
+  - Port de connexion (généralement 22 pour SFTP, 21 pour FTP)
+  - Chemin du dossier web (ex: `/public_html/` ou `/www/`)
+
+**💡 Note :** Le déploiement en production est optionnel. Vous pouvez d'abord maîtriser le déploiement sur GitHub Pages.
 
 ---
 
@@ -344,17 +356,224 @@ Maintenant que tout est configuré, voici le cycle de travail :
 
 ## 🎓 Aller plus loin
 
-### Option 1 : Déploiement en production via SFTP
+---
 
-Pour déployer sur un serveur de production (hébergement web), consulter le guide avancé sur le déploiement SFTP.
+## 🚀 Étape 7 (Optionnel) : Déploiement en production via SFTP
 
-### Option 2 : Ajout de tests automatisés
+Cette étape vous permet de déployer automatiquement votre site sur un hébergement web professionnel.
 
-Intégrer des tests dans le workflow CI/CD pour valider le code avant le déploiement.
+### 7.1 Prérequis
 
-### Option 3 : Environnements multiples
+Avant de commencer, vous devez avoir :
 
-Créer plusieurs environnements (dev, staging, production) avec des workflows différents.
+- ✅ Un hébergement web avec accès SFTP
+- ✅ Les identifiants fournis par votre hébergeur
+
+**📋 Informations nécessaires :**
+
+| Information | Description | Où la trouver |
+|-------------|-------------|---------------|
+| **Serveur SFTP** | Adresse du serveur | Email d'activation de votre hébergeur |
+| **Nom d'utilisateur** | Votre login SFTP | Email d'activation ou panneau de contrôle |
+| **Mot de passe** | Votre mot de passe SFTP | Défini lors de l'activation |
+| **Port** | Port de connexion | Généralement 22 (SFTP) |
+| **Dossier web** | Chemin du dossier public | `/public_html/`, `/www/`, `/htdocs/` |
+
+**💡 Exemple d'email d'activation :**
+```
+Serveur SFTP : sftp.monhebergeur.com
+Utilisateur  : mon-site-123
+Mot de passe : MotDePasse123!
+Port         : 22
+Dossier web  : /public_html/
+```
+
+### 7.2 Configurer les secrets GitHub
+
+Les identifiants SFTP doivent être stockés de manière sécurisée dans GitHub.
+
+**Étapes :**
+
+1. Aller dans votre dépôt GitHub
+2. Cliquer sur **Settings** (Paramètres)
+3. Dans le menu de gauche : **Secrets and variables** → **Actions**
+4. Cliquer sur **New repository secret**
+5. Ajouter les secrets suivants :
+
+| Nom du secret | Valeur | Exemple |
+|---------------|--------|---------|
+| `SFTP_SERVER` | Adresse du serveur | `sftp.monhebergeur.com` |
+| `SFTP_USERNAME` | Nom d'utilisateur | `mon-site-123` |
+| `SFTP_PASSWORD` | Mot de passe | `MotDePasse123!` |
+| `SFTP_SERVER_DIR` | Dossier de destination | `/public_html/` |
+| `SFTP_PORT` | Port de connexion | `22` |
+
+**⚠️ Attention :** Ne JAMAIS mettre ces informations directement dans le code !
+
+### 7.3 Créer le workflow de production
+
+Créer le fichier `.github/workflows/deploy-production.yml` :
+
+```yaml
+name: Deploy to Production (SFTP)
+
+on:
+  # Déclenché uniquement lors de la création d'un tag
+  push:
+    tags:
+      - 'v*.*.*'  # v1.0.0, v2.1.3, etc.
+
+  # Permet le déclenchement manuel
+  workflow_dispatch:
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: production
+      url: https://votredomaine.com  # Remplacer par votre URL
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate static site for production
+        run: npm run generate
+        env:
+          NODE_ENV: production
+
+      - name: Deploy to Production via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          server: ${{ secrets.SFTP_SERVER }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          port: ${{ secrets.SFTP_PORT }}
+          local_path: './.output/public/./'
+          remote_path: ${{ secrets.SFTP_SERVER_DIR }}
+          sftp_only: true
+          delete_remote_files: false
+```
+
+### 7.4 Déployer en production
+
+Pour déployer en production, créer un **tag Git** :
+
+```bash
+# Créer un tag de version
+git tag v1.0.0
+
+# Pousser le tag vers GitHub
+git push origin v1.0.0
+```
+
+**✅ Résultat :** Le workflow se déclenche et déploie sur votre hébergement web !
+
+### 7.5 Vérifier le déploiement
+
+1. Aller sur https://github.com/`<votre-username>`/`<nom-du-depot>`/actions
+2. Vérifier que le workflow "Deploy to Production (SFTP)" est ✅ vert
+3. Accéder à votre site : `https://votredomaine.com`
+
+---
+
+## 🔄 Workflow complet (Test + Production)
+
+Avec les deux workflows configurés, voici votre cycle DevOps complet :
+
+```
+┌────────────────────────────────────────────────────────┐
+│  DÉVELOPPEMENT                                         │
+│  ↓ npm run dev                                         │
+│  ↓ Modifications du code                              │
+│                                                        │
+│  COMMIT + PUSH                                         │
+│  ↓ git add . && git commit -m "feat: ..."            │
+│  ↓ git push origin main                               │
+│                                                        │
+│  DÉPLOIEMENT AUTOMATIQUE TEST 🧪                      │
+│  → GitHub Actions génère le site                      │
+│  → GitHub Pages publie sur                            │
+│     https://<username>.github.io/<repo>/              │
+│                                                        │
+│  TESTS ET VALIDATION ✅                                │
+│  ↓ Vérifier que tout fonctionne                      │
+│                                                        │
+│  DÉPLOIEMENT PRODUCTION 🚀                             │
+│  ↓ git tag v1.0.0                                     │
+│  ↓ git push origin v1.0.0                             │
+│  → GitHub Actions génère le site                      │
+│  → SFTP déploie sur https://votredomaine.com          │
+└────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📋 Gestion des versions (Semantic Versioning)
+
+**Format :** `vMAJEUR.MINEUR.PATCH`
+
+```
+v1.2.3
+│ │ │
+│ │ └─── PATCH  : Corrections de bugs (1.2.3 → 1.2.4)
+│ └───── MINEUR : Nouvelles fonctionnalités (1.2.0 → 1.3.0)
+└─────── MAJEUR : Changements incompatibles (1.0.0 → 2.0.0)
+```
+
+**Exemples :**
+- `v0.1.0` → Première version de test
+- `v1.0.0` → Première version stable en production
+- `v1.1.0` → Ajout d'une nouvelle fonctionnalité
+- `v1.1.1` → Correction d'un bug
+- `v2.0.0` → Refonte majeure
+
+---
+
+## 🆘 Dépannage SFTP
+
+### Erreur "Timeout (control socket)"
+
+**Cause possible :** Le serveur utilise FTP au lieu de SFTP.
+
+**Solution :**
+1. Vérifier avec votre hébergeur s'il supporte SFTP (port 22)
+2. Si votre hébergeur n'offre que FTP (port 21), contacter votre enseignant
+
+### Erreur "Permission denied"
+
+**Solution :**
+1. Vérifier que `SFTP_SERVER_DIR` existe sur votre serveur
+2. Vérifier que votre utilisateur a les droits d'écriture
+3. Tester la connexion avec un client SFTP (FileZilla)
+
+### Le site s'affiche sans styles en production
+
+**Cause :** Le `baseURL` n'est pas configuré correctement.
+
+**Solution :**
+- Pour la production (racine du domaine), le `baseURL` doit être `/`
+- Vérifier que `NUXT_APP_BASE_URL` n'est PAS défini dans le workflow production
+
+---
+
+## 📚 Ressources complémentaires
+
+- [Documentation Nuxt](https://nuxt.com/docs)
+- [Documentation Nuxt UI](https://ui.nuxt.com)
+- [Guide GitHub Actions](https://docs.github.com/en/actions)
+- [Guide GitHub Pages](https://docs.github.com/en/pages)
+- [Semantic Versioning](https://semver.org/lang/fr/)
 
 ---
 
